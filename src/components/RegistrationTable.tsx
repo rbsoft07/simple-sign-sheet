@@ -49,45 +49,58 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     
+    // Title
     doc.setFontSize(18);
+    doc.setFont(undefined, "bold");
     doc.text("Registration Records", pageWidth / 2, 15, { align: "center" });
     
+    // Prepare table data without signature column (we'll add signatures via didDrawCell)
     const tableData = registrations.map((reg) => [
       reg.name,
       reg.lastname,
       reg.phone,
       reg.email,
       new Date(reg.timestamp).toLocaleDateString(),
-      reg.signature || "",
+      "", // Empty cell for signature
     ]);
 
     autoTable(doc, {
       head: [["Name", "Last Name", "Phone", "Email", "Date", "Signature"]],
       body: tableData,
       startY: 25,
+      theme: 'grid',
       styles: {
-        cellPadding: 3,
-        fontSize: 9,
+        cellPadding: 4,
+        fontSize: 10,
         lineColor: [200, 200, 200],
-        lineWidth: 0.1,
+        lineWidth: 0.5,
+        halign: 'left',
+        valign: 'middle',
       },
       headStyles: {
         fillColor: [66, 66, 66],
         textColor: [255, 255, 255],
         fontStyle: "bold",
+        halign: 'center',
       },
       columnStyles: {
-        5: { cellWidth: 35 },
+        0: { cellWidth: 30 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 50 },
+        4: { cellWidth: 25 },
+        5: { cellWidth: 30, minCellHeight: 20 },
       },
       didDrawCell: (data) => {
+        // Draw signature images in the signature column
         if (data.column.index === 5 && data.cell.section === "body") {
-          const signature = registrations[data.row.index].signature;
+          const signature = registrations[data.row.index]?.signature;
           if (signature) {
             try {
-              const imgWidth = 30;
-              const imgHeight = 15;
-              const xPos = data.cell.x + 2;
-              const yPos = data.cell.y + 2;
+              const imgWidth = 28;
+              const imgHeight = 14;
+              const xPos = data.cell.x + 1;
+              const yPos = data.cell.y + (data.cell.height - imgHeight) / 2;
               doc.addImage(signature, "PNG", xPos, yPos, imgWidth, imgHeight);
             } catch (error) {
               console.error("Error adding signature to PDF:", error);
@@ -95,7 +108,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
           }
         }
       },
-      margin: { top: 25 },
+      margin: { top: 25, left: 10, right: 10 },
     });
 
     doc.save(`registrations_${Date.now()}.pdf`);
