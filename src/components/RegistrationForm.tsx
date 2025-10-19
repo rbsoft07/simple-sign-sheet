@@ -169,13 +169,14 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
                 errors.signature ? "border-destructive" : "border-border"
               }`}
             >
-              <SignatureCanvas
-                ref={signatureRef}
-                canvasProps={{
-                  className: "w-full h-40 bg-card",
-                }}
-                backgroundColor="hsl(var(--card))"
-              />
+            <SignatureCanvas
+              ref={signatureRef}
+              penColor="hsl(var(--foreground))"
+              canvasProps={{
+                className: "w-full h-40 bg-card",
+              }}
+              backgroundColor="hsl(var(--card))"
+            />
             </div>
             {errors.signature && <p className="text-sm text-destructive">{errors.signature}</p>}
           </div>
