@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet, FileText, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Registration {
   id: string;
@@ -51,48 +52,50 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     doc.setFontSize(18);
     doc.text("Registration Records", pageWidth / 2, 15, { align: "center" });
     
-    let yPosition = 30;
-    const lineHeight = 8;
-    const sectionSpacing = 15;
-    const pageHeight = doc.internal.pageSize.getHeight();
+    const tableData = registrations.map((reg) => [
+      reg.name,
+      reg.lastname,
+      reg.phone,
+      reg.email,
+      new Date(reg.timestamp).toLocaleDateString(),
+      reg.signature || "",
+    ]);
 
-    registrations.forEach((reg, index) => {
-      // Check if we need a new page
-      if (yPosition + 80 > pageHeight - 20) {
-        doc.addPage();
-        yPosition = 20;
-      }
-
-      doc.setFontSize(12);
-      doc.setFont(undefined, "bold");
-      doc.text(`Registration #${index + 1}`, 15, yPosition);
-      yPosition += lineHeight;
-
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(10);
-      doc.text(`Name: ${reg.name} ${reg.lastname}`, 15, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Phone: ${reg.phone}`, 15, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Email: ${reg.email}`, 15, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Date: ${new Date(reg.timestamp).toLocaleString()}`, 15, yPosition);
-      yPosition += lineHeight;
-
-      // Add signature if available
-      if (reg.signature) {
-        doc.text("Signature:", 15, yPosition);
-        yPosition += lineHeight;
-        try {
-          doc.addImage(reg.signature, "PNG", 15, yPosition, 60, 20);
-          yPosition += 25;
-        } catch (error) {
-          console.error("Error adding signature to PDF:", error);
-          yPosition += 5;
+    autoTable(doc, {
+      head: [["Name", "Last Name", "Phone", "Email", "Date", "Signature"]],
+      body: tableData,
+      startY: 25,
+      styles: {
+        cellPadding: 3,
+        fontSize: 9,
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [66, 66, 66],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        5: { cellWidth: 35 },
+      },
+      didDrawCell: (data) => {
+        if (data.column.index === 5 && data.cell.section === "body") {
+          const signature = registrations[data.row.index].signature;
+          if (signature) {
+            try {
+              const imgWidth = 30;
+              const imgHeight = 15;
+              const xPos = data.cell.x + 2;
+              const yPos = data.cell.y + 2;
+              doc.addImage(signature, "PNG", xPos, yPos, imgWidth, imgHeight);
+            } catch (error) {
+              console.error("Error adding signature to PDF:", error);
+            }
+          }
         }
-      }
-
-      yPosition += sectionSpacing;
+      },
+      margin: { top: 25 },
     });
 
     doc.save(`registrations_${Date.now()}.pdf`);
