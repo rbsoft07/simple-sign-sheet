@@ -171,11 +171,10 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
             >
             <SignatureCanvas
               ref={signatureRef}
-              penColor="hsl(var(--foreground))"
+              penColor="#000000"
               canvasProps={{
-                className: "w-full h-40 bg-card",
+                className: "w-full h-40 bg-white dark:bg-gray-900",
               }}
-              backgroundColor="hsl(var(--card))"
             />
             </div>
             {errors.signature && <p className="text-sm text-destructive">{errors.signature}</p>}
