@@ -19,7 +19,7 @@ interface FormData {
   lastname: string;
   phone: string;
   email: string;
-  tipo: "fundador" | "comprado" | "herdero";
+  tipo: "fundador" | "comprador" | "herdero";
   signature: string;
 }
 
@@ -33,7 +33,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     lastname: "",
     phone: "",
     email: "",
-    tipo: "" as "fundador" | "comprado" | "herdero" | "",
+    tipo: "" as "fundador" | "comprador" | "herdero" | "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const signatureRef = useRef<SignatureCanvas>(null);
@@ -162,7 +162,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
               <Label htmlFor="tipo">Tipo *</Label>
               <Select
                 value={formData.tipo}
-                onValueChange={(value: "fundador" | "comprado" | "herdero") =>
+                onValueChange={(value: "fundador" | "comprador" | "herdero") =>
                   setFormData({ ...formData, tipo: value })
                 }
               >
@@ -174,7 +174,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fundador">Fundador</SelectItem>
-                  <SelectItem value="comprado">Comprado</SelectItem>
+                  <SelectItem value="comprador">Comprador</SelectItem>
                   <SelectItem value="herdero">Herdero</SelectItem>
                 </SelectContent>
               </Select>

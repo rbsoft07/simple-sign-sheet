@@ -160,7 +160,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="fundador">Fundador</SelectItem>
-                <SelectItem value="comprado">Comprado</SelectItem>
+                <SelectItem value="comprador">Comprador</SelectItem>
                 <SelectItem value="herdero">Herdero</SelectItem>
               </SelectContent>
             </Select>

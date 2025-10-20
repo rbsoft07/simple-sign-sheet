@@ -11,7 +11,7 @@ interface Registration {
   lastname: string;
   phone: string;
   email: string;
-  tipo: "fundador" | "comprado" | "herdero";
+  tipo: "fundador" | "comprador" | "herdero";
   signature: string;
   timestamp: string;
 }
