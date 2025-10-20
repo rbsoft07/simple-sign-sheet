@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { RegistrationForm } from "@/components/RegistrationForm";
 import { RegistrationTable } from "@/components/RegistrationTable";
 import { FileSignature } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Registration {
   id: string;
@@ -9,43 +11,84 @@ interface Registration {
   lastname: string;
   phone: string;
   email: string;
+  tipo: "fundador" | "comprado" | "herdero";
   signature: string;
   timestamp: string;
 }
 
-const STORAGE_KEY = "registrations";
-
 const Index = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const { toast } = useToast();
 
-  // Load registrations from localStorage on mount
+  // Load registrations from database on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setRegistrations(JSON.parse(stored));
-      } catch (error) {
-        console.error("Error loading registrations:", error);
-      }
-    }
+    fetchRegistrations();
   }, []);
 
-  // Save to localStorage whenever registrations change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(registrations));
-  }, [registrations]);
+  const fetchRegistrations = async () => {
+    const { data, error } = await supabase
+      .from("registrations")
+      .select("*")
+      .order("timestamp", { ascending: false });
 
-  const handleSubmit = (formData: Omit<Registration, "id" | "timestamp">) => {
-    const newRegistration: Registration = {
-      ...formData,
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-    };
-    setRegistrations([newRegistration, ...registrations]);
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error loading registrations",
+        description: error.message,
+      });
+      return;
+    }
+
+    if (data) {
+      setRegistrations(data);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setRegistrations(registrations.filter((reg) => reg.id !== id));
+  const handleSubmit = async (formData: Omit<Registration, "id" | "timestamp">) => {
+    const { error } = await supabase.from("registrations").insert([
+      {
+        name: formData.name,
+        lastname: formData.lastname,
+        phone: formData.phone,
+        email: formData.email,
+        tipo: formData.tipo,
+        signature: formData.signature,
+      },
+    ]);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error saving registration",
+        description: error.message,
+      });
+      return;
+    }
+
+    // Refresh the list
+    fetchRegistrations();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("registrations").delete().eq("id", id);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting registration",
+        description: error.message,
+      });
+      return;
+    }
+
+    toast({
+      title: "Deleted",
+      description: "Registration deleted successfully",
+    });
+
+    // Refresh the list
+    fetchRegistrations();
   };
 
   return (

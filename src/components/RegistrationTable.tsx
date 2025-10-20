@@ -19,6 +19,7 @@ interface Registration {
   lastname: string;
   phone: string;
   email: string;
+  tipo: string;
   signature: string;
   timestamp: string;
 }
@@ -35,6 +36,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
       "Last Name": reg.lastname,
       Phone: reg.phone,
       Email: reg.email,
+      Tipo: reg.tipo,
       Date: new Date(reg.timestamp).toLocaleString(),
       Signature: reg.signature ? "Signed" : "Not signed",
     }));
@@ -60,12 +62,13 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
       reg.lastname,
       reg.phone,
       reg.email,
+      reg.tipo,
       new Date(reg.timestamp).toLocaleDateString(),
       "", // Empty cell for signature
     ]);
 
     autoTable(doc, {
-      head: [["Name", "Last Name", "Phone", "Email", "Date", "Signature"]],
+      head: [["Name", "Last Name", "Phone", "Email", "Tipo", "Date", "Signature"]],
       body: tableData,
       startY: 25,
       theme: 'grid',
@@ -84,16 +87,17 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
         halign: 'center',
       },
       columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 30 },
-        2: { cellWidth: 30 },
-        3: { cellWidth: 50 },
-        4: { cellWidth: 25 },
-        5: { cellWidth: 30, minCellHeight: 20 },
+        0: { cellWidth: 25 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 28 },
+        3: { cellWidth: 40 },
+        4: { cellWidth: 20 },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 30, minCellHeight: 20 },
       },
       didDrawCell: (data) => {
         // Draw signature images in the signature column
-        if (data.column.index === 5 && data.cell.section === "body") {
+        if (data.column.index === 6 && data.cell.section === "body") {
           const signature = registrations[data.row.index]?.signature;
           if (signature) {
             try {
@@ -164,6 +168,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                   <TableHead>Last Name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Signature</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -176,6 +181,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                     <TableCell>{reg.lastname}</TableCell>
                     <TableCell>{reg.phone}</TableCell>
                     <TableCell>{reg.email}</TableCell>
+                    <TableCell className="capitalize">{reg.tipo}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(reg.timestamp).toLocaleDateString()}
                     </TableCell>

@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import SignatureCanvas from "react-signature-canvas";
 import { useToast } from "@/hooks/use-toast";
 import { PenTool, RotateCcw } from "lucide-react";
@@ -12,6 +19,7 @@ interface FormData {
   lastname: string;
   phone: string;
   email: string;
+  tipo: "fundador" | "comprado" | "herdero";
   signature: string;
 }
 
@@ -25,6 +33,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     lastname: "",
     phone: "",
     email: "",
+    tipo: "" as "fundador" | "comprado" | "herdero" | "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const signatureRef = useRef<SignatureCanvas>(null);
@@ -49,6 +58,9 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Invalid email format";
     }
+    if (!formData.tipo) {
+      newErrors.tipo = "Type is required";
+    }
     if (signatureRef.current?.isEmpty()) {
       newErrors.signature = "Signature is required";
     }
@@ -70,10 +82,10 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     }
 
     const signature = signatureRef.current?.toDataURL() || "";
-    onSubmit({ ...formData, signature });
+    onSubmit({ ...formData, signature } as FormData);
 
     // Reset form
-    setFormData({ name: "", lastname: "", phone: "", email: "" });
+    setFormData({ name: "", lastname: "", phone: "", email: "", tipo: "" as "" });
     signatureRef.current?.clear();
     setErrors({});
 
@@ -144,6 +156,29 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
                 placeholder="your.email@example.com"
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipo">Tipo *</Label>
+              <Select
+                value={formData.tipo}
+                onValueChange={(value: "fundador" | "comprado" | "herdero") =>
+                  setFormData({ ...formData, tipo: value })
+                }
+              >
+                <SelectTrigger
+                  id="tipo"
+                  className={errors.tipo ? "border-destructive" : ""}
+                >
+                  <SelectValue placeholder="Select tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fundador">Fundador</SelectItem>
+                  <SelectItem value="comprado">Comprado</SelectItem>
+                  <SelectItem value="herdero">Herdero</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.tipo && <p className="text-sm text-destructive">{errors.tipo}</p>}
             </div>
           </div>
 
