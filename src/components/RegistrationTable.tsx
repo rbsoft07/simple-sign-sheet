@@ -8,7 +8,15 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileSpreadsheet, FileText, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Download, FileSpreadsheet, FileText, Trash2, Filter } from "lucide-react";
+import { useState } from "react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -30,8 +38,14 @@ interface RegistrationTableProps {
 }
 
 export const RegistrationTable = ({ registrations, onDelete }: RegistrationTableProps) => {
+  const [filterTipo, setFilterTipo] = useState<string>("all");
+
+  const filteredRegistrations = filterTipo === "all" 
+    ? registrations 
+    : registrations.filter(reg => reg.tipo === filterTipo);
+
   const exportToExcel = () => {
-    const dataForExport = registrations.map((reg) => ({
+    const dataForExport = filteredRegistrations.map((reg) => ({
       Name: reg.name,
       "Last Name": reg.lastname,
       Phone: reg.phone,
@@ -44,7 +58,10 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     const ws = XLSX.utils.json_to_sheet(dataForExport);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Registrations");
-    XLSX.writeFile(wb, `registrations_${Date.now()}.xlsx`);
+    const fileName = filterTipo === "all" 
+      ? `registrations_${Date.now()}.xlsx`
+      : `registrations_${filterTipo}_${Date.now()}.xlsx`;
+    XLSX.writeFile(wb, fileName);
   };
 
   const exportToPDF = () => {
@@ -54,10 +71,13 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     // Title
     doc.setFontSize(18);
     doc.setFont(undefined, "bold");
-    doc.text("Registration Records", pageWidth / 2, 15, { align: "center" });
+    const title = filterTipo === "all" 
+      ? "Registration Records" 
+      : `Registration Records - ${filterTipo.charAt(0).toUpperCase() + filterTipo.slice(1)}`;
+    doc.text(title, pageWidth / 2, 15, { align: "center" });
     
     // Prepare table data without signature column (we'll add signatures via didDrawCell)
-    const tableData = registrations.map((reg) => [
+    const tableData = filteredRegistrations.map((reg) => [
       reg.name,
       reg.lastname,
       reg.phone,
@@ -98,7 +118,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
       didDrawCell: (data) => {
         // Draw signature images in the signature column
         if (data.column.index === 6 && data.cell.section === "body") {
-          const signature = registrations[data.row.index]?.signature;
+          const signature = filteredRegistrations[data.row.index]?.signature;
           if (signature) {
             try {
               const imgWidth = 28;
@@ -115,7 +135,10 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
       margin: { top: 25, left: 10, right: 10 },
     });
 
-    doc.save(`registrations_${Date.now()}.pdf`);
+    const fileName = filterTipo === "all" 
+      ? `registrations_${Date.now()}.pdf`
+      : `registrations_${filterTipo}_${Date.now()}.pdf`;
+    doc.save(fileName);
   };
 
   return (
@@ -125,16 +148,28 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
           <div>
             <CardTitle className="text-2xl font-bold text-foreground">Registrations</CardTitle>
             <CardDescription>
-              Total records: {registrations.length}
+              Total records: {registrations.length} {filterTipo !== "all" && `(Showing ${filteredRegistrations.length} ${filterTipo})`}
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Select value={filterTipo} onValueChange={setFilterTipo}>
+              <SelectTrigger className="w-[180px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter by tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="fundador">Fundador</SelectItem>
+                <SelectItem value="comprado">Comprado</SelectItem>
+                <SelectItem value="herdero">Herdero</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               onClick={exportToExcel}
               variant="outline"
               size="sm"
               className="gap-2"
-              disabled={registrations.length === 0}
+              disabled={filteredRegistrations.length === 0}
             >
               <FileSpreadsheet className="h-4 w-4" />
               Excel
@@ -144,7 +179,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
               variant="outline"
               size="sm"
               className="gap-2"
-              disabled={registrations.length === 0}
+              disabled={filteredRegistrations.length === 0}
             >
               <FileText className="h-4 w-4" />
               PDF
@@ -153,11 +188,11 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
         </div>
       </CardHeader>
       <CardContent>
-        {registrations.length === 0 ? (
+        {filteredRegistrations.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Download className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No registrations yet</p>
-            <p className="text-sm">Submit the form above to add your first registration</p>
+            <p>{filterTipo === "all" ? "No registrations yet" : `No ${filterTipo} registrations found`}</p>
+            <p className="text-sm">{filterTipo === "all" ? "Submit the form above to add your first registration" : "Try selecting a different filter"}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -175,7 +210,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {registrations.map((reg) => (
+                {filteredRegistrations.map((reg) => (
                   <TableRow key={reg.id}>
                     <TableCell className="font-medium">{reg.name}</TableCell>
                     <TableCell>{reg.lastname}</TableCell>
