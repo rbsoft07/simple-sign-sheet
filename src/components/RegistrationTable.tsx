@@ -15,9 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, FileSpreadsheet, FileText, Trash2, Filter } from "lucide-react";
+import { Download, FileText, Trash2, Filter } from "lucide-react";
 import { useState } from "react";
-import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -43,26 +42,6 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
   const filteredRegistrations = filterTipo === "all" 
     ? registrations 
     : registrations.filter(reg => reg.tipo === filterTipo);
-
-  const exportToExcel = () => {
-    const dataForExport = filteredRegistrations.map((reg) => ({
-      Name: reg.name,
-      "Last Name": reg.lastname,
-      Phone: reg.phone,
-      Email: reg.email,
-      Tipo: reg.tipo,
-      Date: new Date(reg.timestamp).toLocaleString(),
-      Signature: reg.signature ? "Signed" : "Not signed",
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(dataForExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Registrations");
-    const fileName = filterTipo === "all" 
-      ? `registrations_${Date.now()}.xlsx`
-      : `registrations_${filterTipo}_${Date.now()}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-  };
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -164,16 +143,6 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                 <SelectItem value="herdero">Herdero</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              onClick={exportToExcel}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={filteredRegistrations.length === 0}
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              Excel
-            </Button>
             <Button
               onClick={exportToPDF}
               variant="outline"
