@@ -46,7 +46,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const signatureRef = useRef<SignatureCanvas>(null);
-  const inheritedSignatureRef = useRef<SignatureCanvas>(null);
   const { toast } = useToast();
 
   const validateForm = () => {
@@ -92,9 +91,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
       if (!formData.inherited_from_lastname.trim()) {
         newErrors.inherited_from_lastname = "El apellido de quien heredó es requerido";
       }
-      if (inheritedSignatureRef.current?.isEmpty()) {
-        newErrors.inherited_from_signature = "La firma de quien heredó es requerida";
-      }
     }
 
     setErrors(newErrors);
@@ -114,9 +110,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     }
 
     const signature = signatureRef.current?.toDataURL() || "";
-    const inherited_from_signature = formData.tipo === "heredero" 
-      ? inheritedSignatureRef.current?.toDataURL() || ""
-      : undefined;
 
     const submitData: FormData = {
       name: formData.name,
@@ -132,7 +125,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
       ...(formData.tipo === "heredero" && {
         inherited_from_name: formData.inherited_from_name,
         inherited_from_lastname: formData.inherited_from_lastname,
-        inherited_from_signature,
       }),
     };
 
@@ -151,7 +143,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
       inherited_from_lastname: "",
     });
     signatureRef.current?.clear();
-    inheritedSignatureRef.current?.clear();
     setErrors({});
 
     toast({
@@ -165,10 +156,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     setErrors((prev) => ({ ...prev, signature: "" }));
   };
 
-  const clearInheritedSignature = () => {
-    inheritedSignatureRef.current?.clear();
-    setErrors((prev) => ({ ...prev, inherited_from_signature: "" }));
-  };
 
   return (
     <Card className="w-full shadow-lg border-border/50">
@@ -310,39 +297,6 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
                   />
                   {errors.inherited_from_lastname && <p className="text-sm text-destructive">{errors.inherited_from_lastname}</p>}
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2">
-                    <PenTool className="h-4 w-4" />
-                    Firma de quien heredó *
-                  </Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={clearInheritedSignature}
-                    className="gap-2"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    Limpiar
-                  </Button>
-                </div>
-                <div
-                  className={`border-2 rounded-lg overflow-hidden ${
-                    errors.inherited_from_signature ? "border-destructive" : "border-border"
-                  }`}
-                >
-                  <SignatureCanvas
-                    ref={inheritedSignatureRef}
-                    penColor="#000000"
-                    canvasProps={{
-                      className: "w-full h-40 bg-white dark:bg-gray-900",
-                    }}
-                  />
-                </div>
-                {errors.inherited_from_signature && <p className="text-sm text-destructive">{errors.inherited_from_signature}</p>}
               </div>
             </div>
           )}
