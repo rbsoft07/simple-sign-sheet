@@ -14,9 +14,14 @@ interface Registration {
   lastname: string;
   phone: string;
   email: string;
-  tipo: "fundador" | "comprador" | "herdero" | "comprado";
+  tipo: "fundador" | "comprador" | "heredero" | "comprado";
   signature: string;
   timestamp: string;
+  bought_from_name?: string | null;
+  bought_from_lastname?: string | null;
+  inherited_from_name?: string | null;
+  inherited_from_lastname?: string | null;
+  inherited_from_signature?: string | null;
 }
 
 const Index = () => {
@@ -59,6 +64,11 @@ const Index = () => {
         email: formData.email,
         tipo: formData.tipo,
         signature: formData.signature,
+        bought_from_name: formData.bought_from_name || null,
+        bought_from_lastname: formData.bought_from_lastname || null,
+        inherited_from_name: formData.inherited_from_name || null,
+        inherited_from_lastname: formData.inherited_from_lastname || null,
+        inherited_from_signature: formData.inherited_from_signature || null,
       },
     ]);
 
