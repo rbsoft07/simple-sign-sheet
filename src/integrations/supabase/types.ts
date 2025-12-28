@@ -16,9 +16,14 @@ export type Database = {
     Tables: {
       registrations: {
         Row: {
+          bought_from_lastname: string | null
+          bought_from_name: string | null
           created_at: string
           email: string
           id: string
+          inherited_from_lastname: string | null
+          inherited_from_name: string | null
+          inherited_from_signature: string | null
           lastname: string
           name: string
           phone: string
@@ -27,9 +32,14 @@ export type Database = {
           tipo: Database["public"]["Enums"]["registration_type"]
         }
         Insert: {
+          bought_from_lastname?: string | null
+          bought_from_name?: string | null
           created_at?: string
           email: string
           id?: string
+          inherited_from_lastname?: string | null
+          inherited_from_name?: string | null
+          inherited_from_signature?: string | null
           lastname: string
           name: string
           phone: string
@@ -38,9 +48,14 @@ export type Database = {
           tipo: Database["public"]["Enums"]["registration_type"]
         }
         Update: {
+          bought_from_lastname?: string | null
+          bought_from_name?: string | null
           created_at?: string
           email?: string
           id?: string
+          inherited_from_lastname?: string | null
+          inherited_from_name?: string | null
+          inherited_from_signature?: string | null
           lastname?: string
           name?: string
           phone?: string
@@ -86,7 +101,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      registration_type: "fundador" | "comprado" | "herdero" | "comprador"
+      registration_type: "fundador" | "comprado" | "heredero" | "comprador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -215,7 +230,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      registration_type: ["fundador", "comprado", "herdero", "comprador"],
+      registration_type: ["fundador", "comprado", "heredero", "comprador"],
     },
   },
 } as const
