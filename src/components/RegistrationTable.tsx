@@ -29,6 +29,10 @@ interface Registration {
   tipo: string;
   signature: string;
   timestamp: string;
+  bought_from_name?: string | null;
+  bought_from_lastname?: string | null;
+  inherited_from_name?: string | null;
+  inherited_from_lastname?: string | null;
 }
 
 interface RegistrationTableProps {
@@ -137,10 +141,10 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                 <SelectValue placeholder="Filter by tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">Todos los tipos</SelectItem>
                 <SelectItem value="fundador">Fundador</SelectItem>
                 <SelectItem value="comprador">Comprador</SelectItem>
-                <SelectItem value="herdero">Herdero</SelectItem>
+                <SelectItem value="heredero">Heredero</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -168,14 +172,15 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Last Name</TableHead>
-                  <TableHead>Phone</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Apellido</TableHead>
+                  <TableHead>Teléfono</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Signature</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Comprado/Heredado de</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Firma</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,13 +192,22 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                     <TableCell>{reg.email}</TableCell>
                     <TableCell className="capitalize">{reg.tipo}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
+                      {reg.tipo === "comprador" && reg.bought_from_name && (
+                        <span>{reg.bought_from_name} {reg.bought_from_lastname}</span>
+                      )}
+                      {reg.tipo === "heredero" && reg.inherited_from_name && (
+                        <span>{reg.inherited_from_name} {reg.inherited_from_lastname}</span>
+                      )}
+                      {reg.tipo === "fundador" && <span className="text-muted-foreground/50">-</span>}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       {new Date(reg.timestamp).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       {reg.signature && (
                         <img
                           src={reg.signature}
-                          alt="Signature"
+                          alt="Firma"
                           className="h-8 border border-border rounded"
                         />
                       )}
