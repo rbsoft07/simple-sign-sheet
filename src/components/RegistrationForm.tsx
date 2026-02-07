@@ -54,6 +54,26 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
   const signatureRef = useRef<SignatureCanvas>(null);
   const { toast } = useToast();
 
+  const formatCedula = (value: string): string => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+    
+    // Apply format: 000-0000000-0
+    if (digits.length <= 3) {
+      return digits;
+    } else if (digits.length <= 10) {
+      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    } else {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 10)}-${digits.slice(10, 11)}`;
+    }
+  };
+
+  const handleCedulaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCedula(e.target.value);
+    setFormData({ ...formData, cedula: formatted });
+    setDuplicateError(null);
+  };
+
   const checkDuplicates = async (cedula: string, phone: string): Promise<string | null> => {
     // Check for existing cedula
     const { data: cedulaData } = await supabase
@@ -91,6 +111,8 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     }
     if (!formData.cedula.trim()) {
       newErrors.cedula = "La cédula es requerida";
+    } else if (!/^\d{3}-\d{7}-\d{1}$/.test(formData.cedula)) {
+      newErrors.cedula = "Formato de cédula inválido (000-0000000-0)";
     }
     if (!formData.phone.trim()) {
       newErrors.phone = "El teléfono es requerido";
@@ -256,12 +278,10 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
               <Input
                 id="cedula"
                 value={formData.cedula}
-                onChange={(e) => {
-                  setFormData({ ...formData, cedula: e.target.value });
-                  setDuplicateError(null);
-                }}
+                onChange={handleCedulaChange}
                 className={errors.cedula ? "border-destructive" : ""}
-                placeholder="Ingrese su cédula"
+                placeholder="000-0000000-0"
+                maxLength={13}
               />
               {errors.cedula && <p className="text-sm text-destructive">{errors.cedula}</p>}
             </div>
