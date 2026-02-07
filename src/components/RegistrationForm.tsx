@@ -10,13 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import SignatureCanvas from "react-signature-canvas";
 import { useToast } from "@/hooks/use-toast";
-import { PenTool, RotateCcw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { PenTool, RotateCcw, AlertCircle } from "lucide-react";
 
 export interface FormData {
   name: string;
   lastname: string;
+  cedula: string;
   phone: string;
   email: string;
   tipo: "fundador" | "comprador" | "heredero";
@@ -36,6 +39,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
   const [formData, setFormData] = useState({
     name: "",
     lastname: "",
+    cedula: "",
     phone: "",
     email: "",
     tipo: "" as "fundador" | "comprador" | "heredero" | "",
@@ -45,8 +49,36 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     inherited_from_lastname: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
   const signatureRef = useRef<SignatureCanvas>(null);
   const { toast } = useToast();
+
+  const checkDuplicates = async (cedula: string, phone: string): Promise<string | null> => {
+    // Check for existing cedula
+    const { data: cedulaData } = await supabase
+      .from("registrations")
+      .select("id, name, lastname")
+      .eq("cedula", cedula)
+      .maybeSingle();
+
+    if (cedulaData) {
+      return `Ya existe un registro con esta cédula: ${cedulaData.name} ${cedulaData.lastname}`;
+    }
+
+    // Check for existing phone
+    const { data: phoneData } = await supabase
+      .from("registrations")
+      .select("id, name, lastname")
+      .eq("phone", phone)
+      .maybeSingle();
+
+    if (phoneData) {
+      return `Ya existe un registro con este teléfono: ${phoneData.name} ${phoneData.lastname}`;
+    }
+
+    return null;
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -56,6 +88,9 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     }
     if (!formData.lastname.trim()) {
       newErrors.lastname = "El apellido es requerido";
+    }
+    if (!formData.cedula.trim()) {
+      newErrors.cedula = "La cédula es requerida";
     }
     if (!formData.phone.trim()) {
       newErrors.phone = "El teléfono es requerido";
@@ -97,8 +132,9 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setDuplicateError(null);
 
     if (!validateForm()) {
       toast({
@@ -109,11 +145,27 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
       return;
     }
 
+    // Check for duplicates
+    setIsChecking(true);
+    const duplicateMessage = await checkDuplicates(formData.cedula.trim(), formData.phone.trim());
+    setIsChecking(false);
+
+    if (duplicateMessage) {
+      setDuplicateError(duplicateMessage);
+      toast({
+        variant: "destructive",
+        title: "Registro duplicado",
+        description: duplicateMessage,
+      });
+      return;
+    }
+
     const signature = signatureRef.current?.toDataURL() || "";
 
     const submitData: FormData = {
       name: formData.name,
       lastname: formData.lastname,
+      cedula: formData.cedula,
       phone: formData.phone,
       email: formData.email,
       tipo: formData.tipo as "fundador" | "comprador" | "heredero",
@@ -134,6 +186,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     setFormData({ 
       name: "", 
       lastname: "", 
+      cedula: "",
       phone: "", 
       email: "", 
       tipo: "" as "",
@@ -144,6 +197,7 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
     });
     signatureRef.current?.clear();
     setErrors({});
+    setDuplicateError(null);
 
     toast({
       title: "¡Éxito!",
@@ -165,6 +219,13 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {duplicateError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{duplicateError}</AlertDescription>
+            </Alert>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre *</Label>
@@ -191,11 +252,29 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="cedula">Cédula *</Label>
+              <Input
+                id="cedula"
+                value={formData.cedula}
+                onChange={(e) => {
+                  setFormData({ ...formData, cedula: e.target.value });
+                  setDuplicateError(null);
+                }}
+                className={errors.cedula ? "border-destructive" : ""}
+                placeholder="Ingrese su cédula"
+              />
+              {errors.cedula && <p className="text-sm text-destructive">{errors.cedula}</p>}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="phone">Teléfono *</Label>
               <Input
                 id="phone"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, phone: e.target.value });
+                  setDuplicateError(null);
+                }}
                 className={errors.phone ? "border-destructive" : ""}
                 placeholder="+1 234 567 8900"
               />
@@ -334,8 +413,8 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
             {errors.signature && <p className="text-sm text-destructive">{errors.signature}</p>}
           </div>
 
-          <Button type="submit" className="w-full" size="lg">
-            Enviar Registro
+          <Button type="submit" className="w-full" size="lg" disabled={isChecking}>
+            {isChecking ? "Verificando..." : "Enviar Registro"}
           </Button>
         </form>
       </CardContent>

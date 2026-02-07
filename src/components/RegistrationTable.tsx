@@ -24,6 +24,7 @@ interface Registration {
   id: string;
   name: string;
   lastname: string;
+  cedula: string;
   phone: string;
   email: string;
   tipo: string;
@@ -63,15 +64,18 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     const tableData = filteredRegistrations.map((reg) => [
       reg.name,
       reg.lastname,
+      reg.cedula,
       reg.phone,
       reg.email,
       reg.tipo,
+      reg.bought_from_name ? `${reg.bought_from_name} ${reg.bought_from_lastname || ''}`.trim() : '-',
+      reg.inherited_from_name ? `${reg.inherited_from_name} ${reg.inherited_from_lastname || ''}`.trim() : '-',
       new Date(reg.timestamp).toLocaleDateString(),
       "", // Empty cell for signature
     ]);
 
     autoTable(doc, {
-      head: [["Name", "Last Name", "Phone", "Email", "Tipo", "Date", "Signature"]],
+      head: [["Nombre", "Apellido", "Cédula", "Teléfono", "Email", "Tipo", "Comprado de", "Heredado de", "Fecha", "Firma"]],
       body: tableData,
       startY: 25,
       theme: 'grid',
@@ -90,17 +94,20 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
         halign: 'center',
       },
       columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 25 },
-        2: { cellWidth: 28 },
-        3: { cellWidth: 40 },
-        4: { cellWidth: 20 },
-        5: { cellWidth: 20 },
-        6: { cellWidth: 30, minCellHeight: 20 },
+        0: { cellWidth: 20 },
+        1: { cellWidth: 20 },
+        2: { cellWidth: 20 },
+        3: { cellWidth: 22 },
+        4: { cellWidth: 35 },
+        5: { cellWidth: 18 },
+        6: { cellWidth: 22 },
+        7: { cellWidth: 22 },
+        8: { cellWidth: 18 },
+        9: { cellWidth: 25, minCellHeight: 20 },
       },
       didDrawCell: (data) => {
-        // Draw signature images in the signature column
-        if (data.column.index === 6 && data.cell.section === "body") {
+        // Draw signature images in the signature column (index 9)
+        if (data.column.index === 9 && data.cell.section === "body") {
           const signature = filteredRegistrations[data.row.index]?.signature;
           if (signature) {
             try {
@@ -174,10 +181,12 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                 <TableRow>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Apellido</TableHead>
+                  <TableHead>Cédula</TableHead>
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Comprado/Heredado de</TableHead>
+                  <TableHead>Comprado de</TableHead>
+                  <TableHead>Heredado de</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Firma</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
@@ -188,17 +197,23 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                   <TableRow key={reg.id}>
                     <TableCell className="font-medium">{reg.name}</TableCell>
                     <TableCell>{reg.lastname}</TableCell>
+                    <TableCell>{reg.cedula}</TableCell>
                     <TableCell>{reg.phone}</TableCell>
                     <TableCell>{reg.email}</TableCell>
                     <TableCell className="capitalize">{reg.tipo}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {reg.tipo === "comprador" && reg.bought_from_name && (
+                      {reg.bought_from_name ? (
                         <span>{reg.bought_from_name} {reg.bought_from_lastname}</span>
+                      ) : (
+                        <span className="text-muted-foreground/50">-</span>
                       )}
-                      {reg.tipo === "heredero" && reg.inherited_from_name && (
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {reg.inherited_from_name ? (
                         <span>{reg.inherited_from_name} {reg.inherited_from_lastname}</span>
+                      ) : (
+                        <span className="text-muted-foreground/50">-</span>
                       )}
-                      {reg.tipo === "fundador" && <span className="text-muted-foreground/50">-</span>}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(reg.timestamp).toLocaleDateString()}

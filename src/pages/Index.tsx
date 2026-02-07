@@ -12,6 +12,7 @@ interface Registration {
   id: string;
   name: string;
   lastname: string;
+  cedula: string;
   phone: string;
   email: string;
   tipo: "fundador" | "comprador" | "heredero" | "comprado";
@@ -60,6 +61,7 @@ const Index = () => {
       {
         name: formData.name,
         lastname: formData.lastname,
+        cedula: formData.cedula,
         phone: formData.phone,
         email: formData.email,
         tipo: formData.tipo,

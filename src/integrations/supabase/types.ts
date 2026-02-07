@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           bought_from_lastname: string | null
           bought_from_name: string | null
+          cedula: string
           created_at: string
           email: string
           id: string
@@ -34,6 +35,7 @@ export type Database = {
         Insert: {
           bought_from_lastname?: string | null
           bought_from_name?: string | null
+          cedula?: string
           created_at?: string
           email: string
           id?: string
@@ -50,6 +52,7 @@ export type Database = {
         Update: {
           bought_from_lastname?: string | null
           bought_from_name?: string | null
+          cedula?: string
           created_at?: string
           email?: string
           id?: string
