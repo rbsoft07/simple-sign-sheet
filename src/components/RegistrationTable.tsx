@@ -49,7 +49,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     : registrations.filter(reg => reg.tipo === filterTipo);
 
   const exportToPDF = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'landscape' });
     const pageWidth = doc.internal.pageSize.getWidth();
     
     // Title
@@ -68,20 +68,22 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
       reg.phone,
       reg.email,
       reg.tipo,
-      reg.bought_from_name ? `${reg.bought_from_name} ${reg.bought_from_lastname || ''}`.trim() : '-',
-      reg.inherited_from_name ? `${reg.inherited_from_name} ${reg.inherited_from_lastname || ''}`.trim() : '-',
+      reg.bought_from_name || '-',
+      reg.bought_from_lastname || '-',
+      reg.inherited_from_name || '-',
+      reg.inherited_from_lastname || '-',
       new Date(reg.timestamp).toLocaleDateString(),
       "", // Empty cell for signature
     ]);
 
     autoTable(doc, {
-      head: [["Nombre", "Apellido", "Cédula", "Teléfono", "Email", "Tipo", "Comprado de", "Heredado de", "Fecha", "Firma"]],
+      head: [["Nombre", "Apellido", "Cédula", "Teléfono", "Email", "Tipo", "Comprado de\n(Nombre)", "Comprado de\n(Apellido)", "Heredado de\n(Nombre)", "Heredado de\n(Apellido)", "Fecha", "Firma"]],
       body: tableData,
       startY: 25,
       theme: 'grid',
       styles: {
-        cellPadding: 4,
-        fontSize: 10,
+        cellPadding: 3,
+        fontSize: 8,
         lineColor: [200, 200, 200],
         lineWidth: 0.5,
         halign: 'left',
@@ -92,22 +94,25 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
         textColor: [255, 255, 255],
         fontStyle: "bold",
         halign: 'center',
+        fontSize: 7,
       },
       columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 20 },
+        0: { cellWidth: 18 },
+        1: { cellWidth: 18 },
         2: { cellWidth: 20 },
-        3: { cellWidth: 22 },
-        4: { cellWidth: 35 },
-        5: { cellWidth: 18 },
-        6: { cellWidth: 22 },
-        7: { cellWidth: 22 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 15 },
+        6: { cellWidth: 18 },
+        7: { cellWidth: 18 },
         8: { cellWidth: 18 },
-        9: { cellWidth: 25, minCellHeight: 20 },
+        9: { cellWidth: 18 },
+        10: { cellWidth: 16 },
+        11: { cellWidth: 22, minCellHeight: 20 },
       },
       didDrawCell: (data) => {
-        // Draw signature images in the signature column (index 9)
-        if (data.column.index === 9 && data.cell.section === "body") {
+        // Draw signature images in the signature column (index 11)
+        if (data.column.index === 11 && data.cell.section === "body") {
           const signature = filteredRegistrations[data.row.index]?.signature;
           if (signature) {
             try {
