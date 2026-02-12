@@ -157,7 +157,7 @@ const Index = () => {
           </div>
           <div className="text-center">
             <h1 className="text-4xl font-bold text-foreground mb-2">
-              Registration System
+              Registro Firma Patronato de Maestro Banilejos
             </h1>
             <p className="text-muted-foreground text-lg">
               Capture registrations with digital signatures
