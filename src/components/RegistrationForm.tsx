@@ -236,8 +236,8 @@ export const RegistrationForm = ({ onSubmit }: RegistrationFormProps) => {
   return (
     <Card className="w-full shadow-lg border-border/50">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-foreground">Formulario de Registro</CardTitle>
-        <CardDescription>Complete su información y firme abajo</CardDescription>
+        <CardTitle className="text-2xl font-bold text-foreground">Registro Firma Patronato de Maestro Banilejos</CardTitle>
+        <CardDescription>Complete su información y firme debajo para registrarse</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
