@@ -51,67 +51,92 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
   const exportToPDF = () => {
     const doc = new jsPDF({ orientation: 'landscape' });
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    // Header background bar
+    doc.setFillColor(30, 58, 95);
+    doc.rect(0, 0, pageWidth, 28, 'F');
+    
+    // Accent line
+    doc.setFillColor(212, 175, 55);
+    doc.rect(0, 28, pageWidth, 1.5, 'F');
     
     // Title
-    doc.setFontSize(18);
+    doc.setFontSize(16);
     doc.setFont(undefined, "bold");
-    const title = filterTipo === "all" 
-      ? "Registration Records" 
-      : `Registration Records - ${filterTipo.charAt(0).toUpperCase() + filterTipo.slice(1)}`;
-    doc.text(title, pageWidth / 2, 15, { align: "center" });
+    doc.setTextColor(255, 255, 255);
+    doc.text("Registro Firma Patronato de Maestro Banilejos", pageWidth / 2, 12, { align: "center" });
     
-    // Prepare table data without signature column (we'll add signatures via didDrawCell)
+    // Subtitle
+    doc.setFontSize(9);
+    doc.setFont(undefined, "normal");
+    doc.setTextColor(200, 210, 225);
+    const subtitle = filterTipo === "all" 
+      ? `Total de registros: ${filteredRegistrations.length}`
+      : `Tipo: ${filterTipo.charAt(0).toUpperCase() + filterTipo.slice(1)} — ${filteredRegistrations.length} registro(s)`;
+    doc.text(subtitle, pageWidth / 2, 19, { align: "center" });
+    
+    // Date
+    doc.setFontSize(8);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric' })}`, pageWidth / 2, 25, { align: "center" });
+    
+    doc.setTextColor(0, 0, 0);
+    
     const tableData = filteredRegistrations.map((reg) => [
       reg.name,
       reg.lastname,
       reg.cedula,
       reg.phone,
       reg.email,
-      reg.tipo,
+      reg.tipo.charAt(0).toUpperCase() + reg.tipo.slice(1),
       reg.bought_from_name || '-',
       reg.bought_from_lastname || '-',
       reg.inherited_from_name || '-',
       reg.inherited_from_lastname || '-',
-      new Date(reg.timestamp).toLocaleDateString(),
-      "", // Empty cell for signature
+      new Date(reg.timestamp).toLocaleDateString('es-DO'),
+      "",
     ]);
 
     autoTable(doc, {
       head: [["Nombre", "Apellido", "Cédula", "Teléfono", "Email", "Tipo", "Comprado a\n(Nombre)", "Comprado a\n(Apellido)", "Heredado de\n(Nombre)", "Heredado de\n(Apellido)", "Fecha", "Firma"]],
       body: tableData,
-      startY: 25,
-      theme: 'grid',
+      startY: 33,
+      theme: 'striped',
       styles: {
-        cellPadding: 3,
+        cellPadding: 4,
         fontSize: 8,
-        lineColor: [200, 200, 200],
-        lineWidth: 0.5,
+        lineColor: [220, 220, 220],
+        lineWidth: 0.3,
         halign: 'left',
         valign: 'middle',
+        textColor: [40, 40, 40],
       },
       headStyles: {
-        fillColor: [66, 66, 66],
+        fillColor: [30, 58, 95],
         textColor: [255, 255, 255],
         fontStyle: "bold",
         halign: 'center',
-        fontSize: 7,
+        fontSize: 7.5,
+        cellPadding: 5,
+      },
+      alternateRowStyles: {
+        fillColor: [245, 247, 250],
       },
       columnStyles: {
-        0: { cellWidth: 18 },
-        1: { cellWidth: 18 },
-        2: { cellWidth: 20 },
-        3: { cellWidth: 20 },
-        4: { cellWidth: 30 },
-        5: { cellWidth: 15 },
-        6: { cellWidth: 18 },
-        7: { cellWidth: 18 },
-        8: { cellWidth: 18 },
-        9: { cellWidth: 18 },
-        10: { cellWidth: 16 },
-        11: { cellWidth: 22, minCellHeight: 20 },
+        0: { cellWidth: 22 },
+        1: { cellWidth: 22 },
+        2: { cellWidth: 24 },
+        3: { cellWidth: 22 },
+        4: { cellWidth: 32 },
+        5: { cellWidth: 18 },
+        6: { cellWidth: 20 },
+        7: { cellWidth: 20 },
+        8: { cellWidth: 20 },
+        9: { cellWidth: 20 },
+        10: { cellWidth: 18 },
+        11: { cellWidth: 24, minCellHeight: 22 },
       },
       didDrawCell: (data) => {
-        // Draw signature images in the signature column (index 11)
         if (data.column.index === 11 && data.cell.section === "body") {
           const signature = filteredRegistrations[data.row.index]?.signature;
           if (signature) {
@@ -127,7 +152,14 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
           }
         }
       },
-      margin: { top: 25, left: 10, right: 10 },
+      didDrawPage: () => {
+        doc.setFillColor(212, 175, 55);
+        doc.rect(10, pageHeight - 12, pageWidth - 20, 0.5, 'F');
+        doc.setFontSize(7);
+        doc.setTextColor(130, 130, 130);
+        doc.text("Patronato de Maestro Banilejos — Documento generado automáticamente", pageWidth / 2, pageHeight - 7, { align: "center" });
+      },
+      margin: { top: 33, left: 8, right: 8, bottom: 15 },
     });
 
     const fileName = filterTipo === "all" 
