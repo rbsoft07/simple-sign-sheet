@@ -77,7 +77,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
     ]);
 
     autoTable(doc, {
-      head: [["Nombre", "Apellido", "Cédula", "Teléfono", "Email", "Tipo", "Comprado de\n(Nombre)", "Comprado de\n(Apellido)", "Heredado de\n(Nombre)", "Heredado de\n(Apellido)", "Fecha", "Firma"]],
+      head: [["Nombre", "Apellido", "Cédula", "Teléfono", "Email", "Tipo", "Comprado a\n(Nombre)", "Comprado a\n(Apellido)", "Heredado de\n(Nombre)", "Heredado de\n(Apellido)", "Fecha", "Firma"]],
       body: tableData,
       startY: 25,
       theme: 'grid',
@@ -190,7 +190,7 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Comprado de</TableHead>
+                  <TableHead>Comprado a</TableHead>
                   <TableHead>Heredado de</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Firma</TableHead>
