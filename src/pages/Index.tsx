@@ -159,9 +159,6 @@ const Index = () => {
             <h1 className="text-4xl font-bold text-foreground mb-2">
               Registro Firma Patronato de Maestro Banilejos
             </h1>
-            <p className="text-muted-foreground text-lg">
-              Capture registrations with digital signatures
-            </p>
           </div>
         </header>
 
