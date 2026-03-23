@@ -39,6 +39,7 @@ interface Registration {
 interface RegistrationTableProps {
   registrations: Registration[];
   onDelete: (id: string) => void;
+  isAdmin?: boolean;
 }
 
 export const RegistrationTable = ({ registrations, onDelete }: RegistrationTableProps) => {
