@@ -167,6 +167,7 @@ const Index = () => {
           <RegistrationTable 
             registrations={registrations} 
             onDelete={handleDelete}
+            isAdmin={isAdmin}
           />
         </div>
       </div>

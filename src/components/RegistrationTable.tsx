@@ -192,16 +192,18 @@ export const RegistrationTable = ({ registrations, onDelete, isAdmin }: Registra
                 <SelectItem value="heredero">Heredero</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              onClick={exportToPDF}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={filteredRegistrations.length === 0}
-            >
-              <FileText className="h-4 w-4" />
-              PDF
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={exportToPDF}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={filteredRegistrations.length === 0}
+              >
+                <FileText className="h-4 w-4" />
+                PDF
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
