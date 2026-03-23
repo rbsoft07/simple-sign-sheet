@@ -42,7 +42,7 @@ interface RegistrationTableProps {
   isAdmin?: boolean;
 }
 
-export const RegistrationTable = ({ registrations, onDelete }: RegistrationTableProps) => {
+export const RegistrationTable = ({ registrations, onDelete, isAdmin }: RegistrationTableProps) => {
   const [filterTipo, setFilterTipo] = useState<string>("all");
 
   const filteredRegistrations = filterTipo === "all" 
