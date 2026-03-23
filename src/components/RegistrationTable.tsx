@@ -39,9 +39,10 @@ interface Registration {
 interface RegistrationTableProps {
   registrations: Registration[];
   onDelete: (id: string) => void;
+  isAdmin?: boolean;
 }
 
-export const RegistrationTable = ({ registrations, onDelete }: RegistrationTableProps) => {
+export const RegistrationTable = ({ registrations, onDelete, isAdmin }: RegistrationTableProps) => {
   const [filterTipo, setFilterTipo] = useState<string>("all");
 
   const filteredRegistrations = filterTipo === "all" 
@@ -191,16 +192,18 @@ export const RegistrationTable = ({ registrations, onDelete }: RegistrationTable
                 <SelectItem value="heredero">Heredero</SelectItem>
               </SelectContent>
             </Select>
-            <Button
-              onClick={exportToPDF}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={filteredRegistrations.length === 0}
-            >
-              <FileText className="h-4 w-4" />
-              PDF
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={exportToPDF}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={filteredRegistrations.length === 0}
+              >
+                <FileText className="h-4 w-4" />
+                PDF
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
